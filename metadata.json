@@ -1,0 +1,47 @@
+{
+    "name": "vankosoft/vs_kubernetes",
+    "version": "0.1.0",
+    "author": "Ivan I. Atanasov",
+    "summary": "Installs, configures, and manages a kubernetes cluster.",
+    "license": "Apache-2.0",
+    "source": "git://github.com/iatanasov77/puppet-kubernetes.git",
+    "project_page": "http://github.com/iatanasov77/puppet-kubernetes",
+    "dependencies": [
+      {
+        "name": "puppetlabs-kubernetes",
+        "version_requirement": ">= 6.0.0"
+      },
+      {
+        "name": "puppetlabs-docker",
+        "version_requirement": ">= 3.10.1"
+      },
+      {
+        "name": "puppet-wget",
+        "version_requirement": ">= 2.0.0"
+      }
+    ],
+    "operatingsystem_support": [
+      {
+        "operatingsystem": "RedHat",
+        "operatingsystemrelease": [
+          "7",
+          "8"
+        ]
+      },
+      {
+        "operatingsystem": "CentOS",
+        "operatingsystemrelease": [
+          "7",
+          "8"
+        ]
+      }
+    ],
+    "requirements": [
+      {
+        "name": "puppet",
+        "version_requirement": ">= 4.0.0 < 7.0.0"
+      }
+    ],
+    "description": "A Worked Kubernetes Kluster + Extensions,Plugins"
+  }
+  
