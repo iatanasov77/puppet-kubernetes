@@ -2,10 +2,12 @@ class vs_kubernetes (
     String $type              = 'controller',
     Hash $hosts               = {},
     
-    Array $packages           = [],
     String $gitUserName       = 'undefined_user_name',
     String $gitUserEmail      = 'undefined@example.com',
     String $gitCredentials    = '',
+    
+    Array $packages           = [],
+    Hash $vstools             = {},
     
     Hash $pod_network_plugins = {},
     Hash $subsystems          = {},
@@ -28,6 +30,10 @@ class vs_kubernetes (
         gitUserEmail    => $gitUserEmail,
     }
 
+    class { '::vs_core::vstools':
+        vstools => $vstools,
+    }
+    
     # Create Kubernetes Controller
     ###################################
     if ( $type == 'controller' ) {
