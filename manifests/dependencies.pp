@@ -7,6 +7,10 @@ class vs_kubernetes::dependencies (
     
     Array $packages           = [],
     Hash $vstools             = {},
+    
+    $mySqlProvider            = 'mariadb',
+    String $phpVersion        = '7.2',
+    Boolean $forcePhp7Repo    = true,
 ) {
     class { 'vs_core::scripts':
         # This Make dependency cycle

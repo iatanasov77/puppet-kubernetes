@@ -16,9 +16,28 @@ class vs_kubernetes (
     Hash $subsystems            = {},
     
     Hash $frontendtools         = {},
+    
+    /* LAMP SERVER */
     String $defaultDocumentRoot = '/vagrant/gui/vs-kubernetes-gui/dist/vs-kubernetes-gui',
     String $apiDocumentRoot     = '/vagrant/gui/public',
     String $guiVarDirectory     = '/vagrant/gui/var',
+    
+    Array $apacheModules        = [],
+    
+    String $mysqllRootPassword  = 'vagrant',
+    $mySqlProvider              = 'mariadb',
+    
+    String $phpVersion          = '7.2',
+    Hash $phpModules            = {},
+    Boolean $phpunit            = false,
+    
+    Hash $phpSettings           = {},
+    
+    Hash $phpMyAdmin            = {},
+    Hash $databases             = {},
+    
+    Boolean $forcePhp7Repo      = true,
+    
 ) {
     ######################################################################
     # Stages Before Main
@@ -51,15 +70,20 @@ class vs_kubernetes (
     # Create Kubernetes Controller
     ###################################
     if ( $type == 'controller' ) {
-    
         class { 'vs_kubernetes::dependencies':
+            dependencies    => $dependencies,
+            
             gitUserName     => $gitUserName,
             gitUserEmail    => $gitUserEmail,
             gitCredentials  => $gitCredentials,
             
-            dependencies    => $dependencies,
+            
             packages        => $packages,
             vstools         => $vstools,
+            
+            mySqlProvider   => $mySqlProvider,
+            phpVersion      => $phpVersion,
+            forcePhp7Repo   => $forcePhp7Repo,
         }
         
         class { '::vs_core::frontendtools':
@@ -70,13 +94,24 @@ class vs_kubernetes (
             defaultHost                 => $hosts['kube-controller']['aliases'][0],
             defaultDocumentRoot         => $defaultDocumentRoot,
             apiDocumentRoot             => $apiDocumentRoot,
+            
+            forcePhp7Repo               => $forcePhp7Repo,
+            phpVersion                  => $phpVersion,
+            apacheModules               => $apacheModules,
+            
+            mysqllRootPassword          => $mysqllRootPassword,
+            mySqlProvider               => $mySqlProvider,
+        
+            phpModules                  => $phpModules,
+            phpSettings                 => $phpSettings,
+            phpunit                     => $phpunit,
+            
+            phpMyAdmin                  => $phpMyAdmin,
+            databases                   => $databases,
         }
         
         if ( $container_runtime == 'docker' ) {
-            class { 'vs_kubernetes::container_runtime_docker':
-                #notify => Exec['kubernetes-systemd-reload'],
-                #stage  => 'docker-install',
-            }
+            class { 'vs_kubernetes::container_runtime_docker': }
         }
         
         class { '::vs_kubernetes::controller':
@@ -97,6 +132,14 @@ class vs_kubernetes (
     # Create Kubernetes Worker
     ###################################
     if ( $type == 'worker' ) {
+        if ( container_runtime == 'docker' ) {
+            class { 'vs_kubernetes::container_runtime_docker': }
+            
+            class { '::vs_kubernetes::subsystems::docker':
+                config  => $subsystems['docker'],
+            }
+        }
+        
         class { '::vs_kubernetes::worker':
             
         }
