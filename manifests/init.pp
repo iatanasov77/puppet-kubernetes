@@ -51,11 +51,13 @@ class vs_kubernetes (
     ######################################################################
     stage { 'git-setup': }
     stage { 'kubernetes-controller': }
+    stage { 'kubernetes-worker': }
     stage { 'vault-setup': }
     stage { 'packer-setup': }
     stage { 'notify-services': }
     
-    Stage['main']   -> Stage['git-setup'] -> Stage['kubernetes-controller']
+    Stage['main']   -> Stage['git-setup']
+                    -> Stage['kubernetes-controller'] -> Stage['kubernetes-worker']
                     -> Stage['vault-setup'] -> Stage['packer-setup']
                     -> Stage['notify-services']
     
@@ -132,16 +134,25 @@ class vs_kubernetes (
     # Create Kubernetes Worker
     ###################################
     if ( $type == 'worker' ) {
-        if ( container_runtime == 'docker' ) {
+        class { 'vs_kubernetes::dependencies':
+            dependencies    => $dependencies,
+            
+            gitUserName     => $gitUserName,
+            gitUserEmail    => $gitUserEmail,
+            gitCredentials  => $gitCredentials,
+        }
+        
+        if ( $container_runtime == 'docker' ) {
             class { 'vs_kubernetes::container_runtime_docker': }
             
             class { '::vs_kubernetes::subsystems::docker':
                 config  => $subsystems['docker'],
+                #debug   => true,
             }
         }
         
         class { '::vs_kubernetes::worker':
-            
+            stage   => 'kubernetes-worker',
         }
     }
 }

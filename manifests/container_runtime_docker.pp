@@ -63,14 +63,18 @@ class vs_kubernetes::container_runtime_docker (
             require => File['/opt/vs_devenv'],
         } ->
         
+        ##############################################################################
+        # @TODO: Nees To Be Killed After Kubernetes Is Initialized OR Joined
+        ##############################################################################
         Exec { 'Whait For Containerd Config and Remove It':
             command => '/opt/vs_devenv/fix_containerd.sh > /dev/null 2>&1 &',
-        } ->
+        }
         
         -> Package { 'containerd':
             ensure  => present,
         }
         
+        /* MAY BE BE NOT NEED THIS */
         -> file { '/etc/containerd/FuckingWorkaround':
             ensure  => file,
             owner   => 'root',
