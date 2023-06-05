@@ -1,8 +1,7 @@
 class vs_kubernetes::controller (
     Hash $pod_network_plugins,
 ) {
-    
-    
+
     /*
     wait_for { 'containerd':
       query             => 'systemctl status containerd | grep Active',
