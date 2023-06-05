@@ -8,10 +8,8 @@ class vs_kubernetes::subsystems (
             'docker':
             {
                 if ( $subsys['enabled'] ) {
-                    stage { 'docker-install': before => Stage['main'] }
                     class { '::vs_kubernetes::subsystems::docker':
                         config  => $subsys,
-                        stage   => 'docker-install',
                     }
                 }
             }
@@ -20,10 +18,9 @@ class vs_kubernetes::subsystems (
             {
                 if ( $subsys['enabled'] ) {
                     class { "::vs_kubernetes::subsystems::${$subsysKey}":
-                    	  config	=> $subsys,
-                        require	=> [
-                            Class['kubernetes'], 
-                        ],
+                        config	=> $subsys,
+                        require	=> [ Class['kubernetes'] ],
+                        stage   => 'kubernetes-controller',
                     }
                 }
       

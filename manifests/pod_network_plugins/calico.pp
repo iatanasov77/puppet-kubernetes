@@ -2,11 +2,21 @@ class vs_kubernetes::pod_network_plugins::calico (
     Hash $config    = {},
 ) {
     Exec { 'Install Calico Pod Network.':
-        command     => '/usr/bin/kubectl apply -f https://docs.projectcalico.org/manifests/tigera-operator.yaml',
+        command     => '/usr/bin/kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.0/manifests/tigera-operator.yaml',
+        environment => ['KUBECONFIG=/etc/kubernetes/admin.conf'],
+    } ->
+    Exec { 'Install Calico resource definitions.':
+        command     => '/usr/bin/kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.0/manifests/custom-resources.yaml',
+        environment => ['KUBECONFIG=/etc/kubernetes/admin.conf'],
+    }
+    
+    /*
+    Exec { 'Install Calico Pod Network.':
+        command     => '/usr/bin/kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/tigera-operator.yaml',
         environment => ['KUBECONFIG=/etc/kubernetes/admin.conf'],
     } ->
     wget::fetch { "Download Calico resource definitions.":
-        source      => "https://docs.projectcalico.org/manifests/custom-resources.yaml",
+        source      => "https://raw.githubusercontent.com/projectcalico/calico/master/manifests/custom-resources.yaml",
         destination => '/tmp/custom-resources.yaml',
         verbose     => true,
         mode        => '0777',
@@ -19,4 +29,5 @@ class vs_kubernetes::pod_network_plugins::calico (
         command     => '/usr/bin/kubectl apply -f /tmp/custom-resources.yaml',
         environment => ['KUBECONFIG=/etc/kubernetes/admin.conf'],
     }
+    */
 }

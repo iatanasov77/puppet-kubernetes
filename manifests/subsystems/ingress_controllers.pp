@@ -5,7 +5,7 @@ class vs_kubernetes::subsystems::ingress_controllers (
         class { "::vs_kubernetes::subsystems::ingress_controllers::${controller}":
             require => [
                 Class['vs_kubernetes::controller']
-            ]
+            ],
         }
     }
 }
