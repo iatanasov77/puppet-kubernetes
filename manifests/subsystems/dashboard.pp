@@ -1,7 +1,7 @@
 class vs_kubernetes::subsystems::dashboard (
 	Hash $config    = {},
 ) {
-  #> Expose Kubernetes Dashboard
+    #> Expose Kubernetes Dashboard
     Exec { 'Export Kubernetes Dashboard Service.':
         command     => '/usr/bin/kubectl -n kubernetes-dashboard get service kubernetes-dashboard -o yaml > /tmp/dashboard-service.yaml',
         environment => ['KUBECONFIG=/etc/kubernetes/admin.conf'],
@@ -10,7 +10,7 @@ class vs_kubernetes::subsystems::dashboard (
         command     => "sed -ri 's/^(\s*)(type\s*:\s*ClusterIP\s*$)/\1type: NodePort/' /tmp/dashboard-service.yaml",
     } ->
     Exec { 'Fix Port of Kubernetes Dashboard Service.':
-        command     => "sed -ri '/^(\s*)(targetPort.*)/a \ \ \ \ nodePort: 31001' /tmp/dashboard-service.yaml",
+        command     => "sed -ri '/^(\s*)(targetPort.*)/a \ \ \ \ nodePort: ${config['port']}' /tmp/dashboard-service.yaml",
     } ->
     Exec { 'Apply Kubernetes Dashboard Service.':
         command     => '/usr/bin/kubectl apply -f /tmp/dashboard-service.yaml',
