@@ -14,6 +14,33 @@ class vs_kubernetes::subsystems (
                 }
             }
             
+            'ansible':
+            {
+                if ( $subsys['enabled'] ) {
+                    class { '::vs_kubernetes::subsystems::ansible':
+                        config  => $subsys,
+                    }
+                }
+            }
+            
+            'cloud_platforms':
+            {
+                if ( $subsys['enabled'] ) {
+                    class { '::vs_kubernetes::subsystems::cloud_platforms':
+                        config  => $subsys,
+                    }
+                }
+            }
+            
+            'hashicorp':
+            {
+                if ( $subsys['enabled'] ) {
+                    class { '::vs_kubernetes::subsystems::hashicorp':
+                        config  => $subsys,
+                    }
+                }
+            }
+            
             default:
             {
                 if ( $subsys['enabled'] ) {

@@ -57,8 +57,8 @@ class vs_kubernetes (
     stage { 'notify-services': }
     
     Stage['main']   -> Stage['git-setup']
-                    -> Stage['kubernetes-controller'] -> Stage['kubernetes-worker']
                     -> Stage['vault-setup'] -> Stage['packer-setup']
+                    -> Stage['kubernetes-controller'] -> Stage['kubernetes-worker']
                     -> Stage['notify-services']
     
     ######################################################################
