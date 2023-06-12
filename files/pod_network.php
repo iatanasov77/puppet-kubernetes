@@ -59,6 +59,7 @@ switch ( $podNetworkProvider ) {
         $yaml   = file_get_contents( $url );
         
         if ( $podNetworkCidr == '10.244.0.0/16' ) {
+            mkdir( $baseDir . '/data/' );
             file_put_contents( $baseDir . '/data/pod_network.yaml', $yaml );
         } else {
             $ndocs  = 0;
