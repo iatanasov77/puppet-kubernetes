@@ -1,4 +1,4 @@
-class vs_kubernetes::container_runtime_docker (
+class vs_kubernetes::kubernetes::container_runtime_docker (
     String $docker_log_max_size                     = '100m',
     String $docker_log_max_file                     = '1',
     String $docker_cgroup_driver                    = 'systemd',
@@ -36,12 +36,6 @@ class vs_kubernetes::container_runtime_docker (
             command => '/usr/bin/systemctl restart containerd',
         }
     } else {
-        ensure_resource( 'file', '/opt/vs_devenv', {
-            ensure  => 'directory',
-            owner   => 'root',
-            group   => 'root',
-            mode    => '0777',
-        })
         
         package { 'inotify-tools':
             ensure => present,
@@ -52,15 +46,6 @@ class vs_kubernetes::container_runtime_docker (
             mode   => '0644',
             owner  => 'root',
             group  => 'root',
-        } ->
-        
-        file { '/opt/vs_devenv/fix_containerd.sh':
-            ensure  => present,
-            owner   => 'root',
-            group   => 'root',
-            mode    => '0777',
-            source  => 'puppet:///modules/vs_kubernetes/fix_containerd.sh',
-            require => File['/opt/vs_devenv'],
         } ->
         
         ##############################################################################

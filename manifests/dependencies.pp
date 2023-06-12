@@ -17,6 +17,19 @@ class vs_kubernetes::dependencies (
         #stage => 'install-dependencies'
     }
     
+    ##############################################################
+    # PHP YAML Package Needed To Edit Pod Network Configuration
+    ##############################################################
+    if ! defined( Package['php-yaml'] ) {
+        package { 'php-yaml':
+            ensure => present,
+        }
+    }
+    
+    class { 'vs_kubernetes::scripts':
+    
+    }
+    
     class { '::vs_core::dependencies::repos':
         dependencies  => $dependencies,
         forcePhp7Repo => $forcePhp7Repo,

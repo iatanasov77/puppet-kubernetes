@@ -10,8 +10,10 @@ class vs_kubernetes (
     Array $packages             = [],
     Hash $vstools               = {},
     
-    Hash $pod_network_plugins   = {},
+    Hash $kubernetesConfig,
     String $container_runtime   = 'docker',
+    String $network_provider    = 'flannel',
+    String $network_cidr        = '10.244.0.0/16',
     
     Hash $subsystems            = {},
     
@@ -113,11 +115,13 @@ class vs_kubernetes (
         }
         
         if ( $container_runtime == 'docker' ) {
-            class { 'vs_kubernetes::container_runtime_docker': }
+            class { 'vs_kubernetes::kubernetes::container_runtime_docker': }
         }
         
-        class { '::vs_kubernetes::controller':
-            pod_network_plugins => $pod_network_plugins,
+        class { '::vs_kubernetes::kubernetes::controller':
+            kubernetesConfig    => $kubernetesConfig,
+            network_provider    => $network_provider,
+            network_cidr        => $network_cidr,
             stage               => 'kubernetes-controller',
         }
         
@@ -143,7 +147,7 @@ class vs_kubernetes (
         }
         
         if ( $container_runtime == 'docker' ) {
-            class { 'vs_kubernetes::container_runtime_docker': }
+            class { 'vs_kubernetes::kubernetes::container_runtime_docker': }
             
             class { '::vs_kubernetes::subsystems::docker':
                 config  => $subsystems['docker'],
@@ -151,7 +155,7 @@ class vs_kubernetes (
             }
         }
         
-        class { '::vs_kubernetes::worker':
+        class { '::vs_kubernetes::kubernetes::worker':
             stage   => 'kubernetes-worker',
         }
     }

@@ -1,4 +1,4 @@
-class vs_kubernetes::worker (
+class vs_kubernetes::kubernetes::worker (
     
 ) {
     class { 'kubernetes':

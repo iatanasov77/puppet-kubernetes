@@ -4,7 +4,7 @@ class vs_kubernetes::subsystems::ingress_controllers (
     $config['controllers'].each |String $controller| {
         class { "::vs_kubernetes::subsystems::ingress_controllers::${controller}":
             require => [
-                Class['vs_kubernetes::controller']
+                Class['vs_kubernetes::kubernetes::controller']
             ],
         }
     }

@@ -1,5 +1,7 @@
-class vs_kubernetes::controller (
-    Hash $pod_network_plugins,
+class vs_kubernetes::kubernetes::controller (
+    Hash $kubernetesConfig,
+    String $network_provider    = 'flannel',
+    String $network_cidr        = '10.244.0.0/16',
 ) {
 
     /*
@@ -60,15 +62,13 @@ class vs_kubernetes::controller (
         ],
     }
 
-    $pod_network_plugins.each |String $pluginKey, Hash $pluginConfig| {
-        if ( $pluginConfig['enabled'] ) {
-            class { "::vs_kubernetes::pod_network_plugins::${$pluginKey}":
-                config  => $pluginConfig,
-                require	=> [
-                    Exec['Enable Kubernetes for Root User'],
-                ],
-            }
-        }
+    class { 'vs_kubernetes::kubernetes::pod_network':
+        kubernetesConfig    => $kubernetesConfig,
+        network_provider    => $network_provider,
+        network_cidr        => $network_cidr,
+        require => [
+            Class['kubernetes'],
+        ],
     }
     
     # Setup Kubernetes Proxy (Expose Dashboard outside of Node)
