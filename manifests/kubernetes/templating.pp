@@ -1,8 +1,8 @@
-class vs_kubernetes::subsystems::templating (
+class vs_kubernetes::kubernetes::templating (
     Hash $config  = {},
 ) {
     $config['tools'].each |String $tool| {
-        class { "::vs_kubernetes::subsystems::templating::${$tool}":
+        class { "::vs_kubernetes::kubernetes::templating::${$tool}":
             config  => $config,
         }
     }

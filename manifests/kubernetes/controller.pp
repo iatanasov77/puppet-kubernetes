@@ -28,8 +28,6 @@ class vs_kubernetes::kubernetes::controller (
             'FileExisting-conntrack',
             #all,
         ],
-        
-        stage                       => 'kubernetes-controller',
     }
 
     ##############################################################
@@ -48,36 +46,61 @@ class vs_kubernetes::kubernetes::controller (
         path    => '/tmp/setup_kubernetes_controller.sh',
         content => template( 'vs_kubernetes/setup_kubernetes_controller.sh.erb' ),
         mode    => '0755',
-        require => [
-            Class['kubernetes'],
-        ],
+        require => [ Class['kubernetes'] ],
     }
     
     Exec { 'Enable Kubernetes for Vagrant User':
         command     => '/tmp/setup_kubernetes_controller.sh',
         user        => 'vagrant',
         environment => ['HOME=/home/vagrant'],
-        require => [
-            Class['kubernetes'],
-        ],
+        require => [ Class['kubernetes'] ],
     }
 
     class { 'vs_kubernetes::kubernetes::pod_network':
         kubernetesConfig    => $kubernetesConfig,
         network_provider    => $network_provider,
         network_cidr        => $network_cidr,
-        require => [
-            Class['kubernetes'],
-        ],
+        require => [ Class['kubernetes'] ],
     }
     
+    ################################################################
     # Setup Kubernetes Proxy (Expose Dashboard outside of Node)
-    ###############################################################
+    ################################################################
     Exec { 'Setup Kubernetes Proxy.':
         command     => "/usr/bin/kubectl proxy --address='0.0.0.0' --accept-hosts='^*$' &",
         environment => ['KUBECONFIG=/etc/kubernetes/admin.conf'],
         require => [
             Class['kubernetes'],
         ],
+    }
+    
+    ################################################################
+    # Kubernetes Dashboard
+    ################################################################
+    if ( $kubernetesConfig['dashboard']['enabled'] ) {
+        class { 'vs_kubernetes::kubernetes::dashboard':
+            config  => $kubernetesConfig['dashboard'],
+            require => [ Class['kubernetes'] ],
+        }
+    }
+    
+    ################################################################
+    # Ingress Controllers
+    ################################################################
+    if ( $kubernetesConfig['ingress_controllers']['enabled'] ) {
+        class { 'vs_kubernetes::kubernetes::ingress_controllers':
+            config  => $kubernetesConfig['ingress_controllers'],
+            require => [ Class['kubernetes'] ],
+        }
+    }
+    
+    ################################################################
+    # Kubernetes Templating
+    ################################################################
+    if ( $kubernetesConfig['templating']['enabled'] ) {
+        class { 'vs_kubernetes::kubernetes::templating':
+            config  => $kubernetesConfig['templating'],
+            require => [ Class['kubernetes'] ],
+        }
     }
 }

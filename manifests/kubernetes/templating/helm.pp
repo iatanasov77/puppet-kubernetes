@@ -1,4 +1,4 @@
-class vs_kubernetes::subsystems::templating::helm (
+class vs_kubernetes::kubernetes::templating::helm (
     Hash $config  = {},
 ) {
     wget::fetch { "Download Helm Setup.":

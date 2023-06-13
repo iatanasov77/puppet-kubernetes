@@ -1,4 +1,4 @@
-class vs_kubernetes::subsystems::templating::skaffold (
+class vs_kubernetes::kubernetes::templating::skaffold (
     Hash $config  = {},
 ) {
     wget::fetch { "Download Skaffold Setup.":

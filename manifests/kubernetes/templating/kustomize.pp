@@ -1,4 +1,4 @@
-class vs_kubernetes::subsystems::templating::kustomize (
+class vs_kubernetes::kubernetes::templating::kustomize (
     Hash $config  = {},
 ) {
     wget::fetch { "Download Kustomize Setup.":

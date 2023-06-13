@@ -1,4 +1,4 @@
-class vs_kubernetes::subsystems::dashboard (
+class vs_kubernetes::kubernetes::dashboard (
 	Hash $config    = {},
 ) {
     #> Expose Kubernetes Dashboard

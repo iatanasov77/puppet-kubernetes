@@ -1,4 +1,4 @@
-class vs_kubernetes::subsystems::ingress_controllers::nginx (
+class vs_kubernetes::kubernetes::ingress_controllers::nginx (
     Hash $config    = {},
 ) {
     if ! defined( Package['unzip'] ) {

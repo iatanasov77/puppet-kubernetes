@@ -1,4 +1,4 @@
-class vs_kubernetes::subsystems::ingress_controllers::haproxy (
+class vs_kubernetes::kubernetes::ingress_controllers::haproxy (
     Hash $config    = {},
 ) {
     Exec { 'Apply HaProxy Ingress Controller.':
