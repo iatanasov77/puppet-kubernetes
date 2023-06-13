@@ -73,10 +73,14 @@ switch ( $podNetworkProvider ) {
         
         break;
     case 'calico':
-        $url    = "https://raw.githubusercontent.com/projectcalico/calico/v{$podNetworkVersion}/manifests/custom-resources.yaml";
-        $yaml   = file_get_contents( $url );
         $ndocs  = 0;
-        $data   = yaml_parse( $yaml, -1, $ndocs );
+        
+        $yamlTigera = file_get_contents( "https://raw.githubusercontent.com/projectcalico/calico/v{$podNetworkVersion}/manifests/tigera-operator.yaml" );
+        $dataTigera = yaml_parse( $yamlTigera, -1, $ndocs );
+        
+        $url        = "https://raw.githubusercontent.com/projectcalico/calico/v{$podNetworkVersion}/manifests/custom-resources.yaml";
+        $yaml       = file_get_contents( $url );
+        $data       = yaml_parse( $yaml, -1, $ndocs );
         
         $data[0]['spec']['calicoNetwork']['ipPools'][0]   = [
             'blockSize'     => '26',
@@ -86,7 +90,7 @@ switch ( $podNetworkProvider ) {
             'nodeSelector'  => 'all()',
         ];
         
-        createConfig( $data );
+        createConfig( array_merge( $dataTigera, $data ) );
         createLog( "Succefully Create Network: " . $podNetworkProvider );
         
         break;
