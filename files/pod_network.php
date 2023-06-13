@@ -2,6 +2,7 @@
 <?php
 // php /opt/vs_devenv/pod_network.php calico 3.26.0 10.244.0.0/16
 $baseDir    = '/opt/vs_devenv';
+$newYamlString;
 
 function getUsage()
 {
@@ -24,7 +25,7 @@ function createLog( string $data )
     file_put_contents( $logFile, $logRow . "\n", FILE_APPEND );
 }
 
-function createConfig( array $data )
+function ensureDataDir(): string
 {
     global $baseDir;
     
@@ -33,13 +34,28 @@ function createConfig( array $data )
         mkdir( $dataDir );
     }
     
-    $dataFile   = $dataDir . 'pod_network.yaml';
-    file_put_contents( $dataFile, yaml_emit( $data[0] ) . "\n\n" );
-    for ( $i = 1; $i < count( $data ); $i++ ) {
-        file_put_contents( $dataFile, yaml_emit( $data[$i] ) . "\n\n", FILE_APPEND );
-    }
+    return $dataDir;
 }
 
+function createFlannelConfig( array $data ): string
+{
+    $yamlString = yaml_emit( $data[0] ) . "\n\n";
+    for ( $i = 1; $i < count( $data ); $i++ ) {
+        $yamlString .= yaml_emit( $data[$i] ) . "\n\n";
+    }
+    
+    return $yamlString;
+}
+
+function createCalicoConfig( array $data ): string
+{
+    $yamlString = yaml_emit( $data[0] ) . "\n\n";
+    for ( $i = 1; $i < count( $data ); $i++ ) {
+        $yamlString .= yaml_emit( $data[$i] ) . "\n\n";
+    }
+    
+    return str_replace( 'spec: []', 'spec: {}', $yamlString );
+}
 
 /**
  * MAIN SCRIPT
@@ -59,41 +75,42 @@ switch ( $podNetworkProvider ) {
         $yaml   = file_get_contents( $url );
         
         if ( $podNetworkCidr == '10.244.0.0/16' ) {
-            mkdir( $baseDir . '/data/' );
-            file_put_contents( $baseDir . '/data/pod_network.yaml', $yaml );
+            $newYamlString  = $yaml;
         } else {
             $ndocs  = 0;
             $data   = yaml_parse( $yaml, -1, $ndocs );
             
             $data[4]['data']['net-conf.json']   = "{\"Network\": \"" . $podNetworkCidr . "\",\"Backend\": {\"Type\": \"vxlan\"}}";
             
-            createConfig( $data );
+            $newYamlString  = createFlannelConfig( $data );
         }
-            createLog( "Succefully Create Network: " . $podNetworkProvider );
         
         break;
     case 'calico':
         $ndocs  = 0;
-        
-        $yamlTigera = file_get_contents( "https://raw.githubusercontent.com/projectcalico/calico/v{$podNetworkVersion}/manifests/tigera-operator.yaml" );
-        $dataTigera = yaml_parse( $yamlTigera, -1, $ndocs );
         
         $url        = "https://raw.githubusercontent.com/projectcalico/calico/v{$podNetworkVersion}/manifests/custom-resources.yaml";
         $yaml       = file_get_contents( $url );
         $data       = yaml_parse( $yaml, -1, $ndocs );
         
         $data[0]['spec']['calicoNetwork']['ipPools'][0]   = [
-            'blockSize'     => '26',
+            'blockSize'     => 26,
             'cidr'          =>  $podNetworkCidr,
             'encapsulation' => 'VXLANCrossSubnet',
             'natOutgoing'   => 'Enabled',
             'nodeSelector'  => 'all()',
         ];
         
-        createConfig( array_merge( $dataTigera, $data ) );
-        createLog( "Succefully Create Network: " . $podNetworkProvider );
+        $newYamlString  = createCalicoConfig( $data );
         
         break;
     default:
         createLog( "Unsupported Network Provider: " . $podNetworkProvider );
 }
+
+$dataDir    = ensureDataDir();
+$dataFile   = $dataDir . 'pod_network.yaml';
+
+file_put_contents( $dataFile, $newYamlString );
+
+createLog( "Succefully Create Network: " . $podNetworkProvider );

@@ -25,28 +25,25 @@ class vs_kubernetes::kubernetes::pod_network (
     
     $podNetworkVersion  = $kubernetesConfig['pod_network_plugins'][$podNetworkProvider]['version'];
     
+    if ( $podNetworkProvider == 'calico' ) {
+        Exec { 'Create Calico Tigera Operator':
+            command     => "/usr/bin/kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v${podNetworkVersion}/manifests/tigera-operator.yaml",
+            environment => ['KUBECONFIG=/etc/kubernetes/admin.conf'],
+        }
+        
+        $required   = [
+            Exec['Create Calico Tigera Operator'],
+        ]
+    } else {
+        $required   = []
+    }
     
     Exec { 'Create Pod Network Config':
         command     => "php /opt/vs_devenv/pod_network.php ${podNetworkProvider} ${podNetworkVersion} ${podNetworkCidr}",
     } ->
     Exec { 'Apply Pod Network Config':
-        command     => "/usr/bin/kubectl apply -f /opt/vs_devenv/data/pod_network.yaml",
+        command     => "/usr/bin/kubectl create -f /opt/vs_devenv/data/pod_network.yaml",
         environment => ['KUBECONFIG=/etc/kubernetes/admin.conf'],
+        require     => $required,
     }
-    
-    
-    /*
-    
-    $kubernetesConfig['pod_network_plugins'].each |String $pluginKey, Hash $pluginConfig| {
-        if ( $pluginConfig['enabled'] ) {
-            class { "::vs_kubernetes::pod_network_plugins::${$pluginKey}":
-                config  => $pluginConfig,
-                require => [
-                    Exec['Enable Kubernetes for Root User'],
-                ],
-            }
-        }
-    }
-    
-    */
 }
